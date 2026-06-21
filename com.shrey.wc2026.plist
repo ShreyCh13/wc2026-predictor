@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.shrey.wc2026</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/bin/python3</string>
+        <string>/Users/admin/agents/apps/wc2026/server.py</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>WC_PORT</key>
+        <string>8790</string>
+    </dict>
+    <key>WorkingDirectory</key>
+    <string>/Users/admin/agents/apps/wc2026</string>
+    <key>KeepAlive</key>
+    <true/>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>ThrottleInterval</key>
+    <integer>10</integer>
+    <key>StandardOutPath</key>
+    <string>/Users/admin/agents/logs/wc2026.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/admin/agents/logs/wc2026.err.log</string>
+</dict>
+</plist>
