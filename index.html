@@ -535,8 +535,14 @@ async function loadMatches(){
 async function loadKo(){
   try{ const r=await fetch("api/ko_results",{cache:"no-store"}); if(r.ok) koResults=await r.json(); }catch(e){}
 }
-/* normalize a team name to the same lowercase token the pipeline uses as ko_results keys */
-function normTeam(n){ return (n||"").normalize("NFKD").replace(/[^\x00-\x7F]/g,"").toLowerCase().replace(/[^a-z0-9]/g,""); }
+/* normalize a team name to the same lowercase token the pipeline uses as ko_results keys.
+   Mirror of update_results.py norm()/ALIASES — these two MUST stay in lockstep because they
+   generate the two halves of the same dictionary key (pipeline writes, client reads). */
+const TEAM_ALIASES = { unitedstates:"usa", bosniaherzegovina:"bosnia", congodr:"drcongo", ivorycoast:"ivorycoast", cotedivoire:"ivorycoast" };
+function normTeam(n){
+  const s=(n||"").normalize("NFKD").replace(/[^\x00-\x7F]/g,"").toLowerCase().replace(/[^a-z0-9]/g,"");
+  return TEAM_ALIASES[s] || s;
+}
 
 /* the REAL bracket from real group results + real knockout results (no predictions).
    returns {round: Set(teams)} of who actually reached each round, or null if not ready. */

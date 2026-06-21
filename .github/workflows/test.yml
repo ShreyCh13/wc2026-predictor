@@ -1,0 +1,28 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Engine + FIFA-table tests
+        run: node tests/test_engine.mjs
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Python syntax check (stdlib only — nothing to install)
+        run: |
+          python -c "import ast; ast.parse(open('server.py').read()); ast.parse(open('update_results.py').read()); print('server.py + update_results.py parse OK')"
