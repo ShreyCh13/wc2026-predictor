@@ -79,8 +79,6 @@
 
 ## Known trade-offs & roadmap
 
-Honest list of things a reviewer would (rightly) flag:
-
 - **Two normalizers must stay in lockstep.** `update_results.py:norm()` and
   `index.html:normTeam()` generate the two halves of the knockout-results key. They share an
   alias map and are covered by a test, but the cleanest fix is to have the server emit the

@@ -54,8 +54,8 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the full design and the t
   logs.
 - **Tested headlessly.** The engine and the FIFA table are covered by tests that evaluate the
   page script in a DOM stub — no browser required.
-- **Reviewed by a multi-agent audit.** Independent reviewers per dimension, cross-checked and
-  severity-ranked. Findings and fixes in [`docs/AUDIT.md`](docs/AUDIT.md).
+- **Hardened and documented.** Security, correctness, and reliability notes — plus the known
+  trade-offs — in [`docs/ENGINEERING.md`](docs/ENGINEERING.md).
 
 ## Tech stack
 
@@ -95,12 +95,12 @@ deploy/deploy.sh           # copies the app to the host and (re)loads the launch
 ├── fixtures_seed.json      # the 72 group-stage fixtures
 ├── tests/test_engine.mjs   # headless tests for the engine + FIFA table
 ├── deploy/                 # launchd services + one-command deploy
-└── docs/                   # architecture + audit notes
+└── docs/                   # architecture + engineering notes
 ```
 
 ## Related project
 
-**[Gut Check](#)** — a companion Telegram bot for the same World Cup that journals your betting
+**Gut Check** — a companion Telegram bot for the same World Cup that journals your betting
 *reads* before kickoff and grades them at full time to surface your real edge. Where this project
 is the *social* game (a friends' bracket leaderboard), Gut Check is the *private* analyst. Both
 run on the same host and share the same tournament data.
