@@ -14,7 +14,8 @@ real match results as they come in — no manual updating, ever.
 ## What it does
 
 - **Predict** the score of every upcoming match. Standings recompute instantly using the real
-  FIFA tiebreakers (points → goal difference → goals scored → head-to-head).
+  2026 FIFA tiebreakers (points → head-to-head → goal difference → goals scored — head-to-head
+  before goal difference is new this year).
 - **Fill the bracket** — Round of 32 to the final — including the 48-team format's *eight best
   third-placed teams*, placed by FIFA's official allocation table.
 - **Compete** — publish your bracket to a shared board. As real games finish, every bracket is

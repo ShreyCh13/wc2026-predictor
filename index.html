@@ -155,7 +155,7 @@
   <h1>⚽ World Cup 2026 — Predictor &amp; Leaderboard</h1>
   <p class="sub"><b>Predict the games, win points, beat your friends.</b> Open a group, <b>type your predicted score</b> for each upcoming match — you get <b class="tag1">5 points for the exact score</b>, <b class="tag1">2 for the right winner</b>. Send teams up the bracket to your champion, then <b>Publish</b> to climb the live leaderboard. The tables fill in from <b>real results</b> automatically.
   <a class="sharebtn" href="#" onclick="copyShareLink(event)">🔗 Copy link to share</a>
-  <details class="nerd"><summary>Nerd details</summary><span>Standings use the real FIFA tiebreakers (points → goal difference → goals → head-to-head). The 8 best third-placed teams advance via FIFA's official 495-combination Annex C table. Bracket linkages match the official schedule exactly.</span></details></p>
+  <details class="nerd"><summary>Nerd details</summary><span>Standings use the 2026 FIFA tiebreakers (points → head-to-head → goal difference → goals; new this year, head-to-head comes before goal difference). The 8 best third-placed teams advance via FIFA's official 495-combination Annex C table. Bracket linkages match the official schedule exactly.</span></details></p>
 
   <div class="layout">
     <div class="panel">
@@ -290,19 +290,61 @@ const BUILTINS = {
   }
 };
 
-/* head-to-head between two teams in a group (final or predicted result of their game).
-   returns +1 if A beat B, -1 if B beat A, 0 if drew/undecided. */
-function h2h(g, A, B){
-  const arr=FIX[g];
-  for(let i=0;i<arr.length;i++){ const m=arr[i];
-    const isAB=(m[0]===A&&m[1]===B), isBA=(m[0]===B&&m[1]===A);
-    if(!isAB&&!isBA) continue;
-    let hs=m[2], as=m[3];
-    if(hs==null||as==null){ const p=predicted[g+i]; if(p&&p.h!==""&&p.a!=="") { hs=+p.h; as=+p.a; } else return 0; }
-    const r=Math.sign(hs-as);
-    return isAB ? r : -r;
+/* actual (final) or the user's predicted scoreline for a fixture, else null */
+function scoreOfMatch(g, idx){
+  const m=FIX[g][idx];
+  if(m[2]!=null && m[3]!=null) return [m[2], m[3]];
+  const p=predicted[g+idx];
+  if(p && p.h!=="" && p.a!=="") return [+p.h, +p.a];
+  return null;
+}
+/* mini-league among a subset of teams: points/GD/goals counting ONLY the games
+   played between teams in that subset (this is FIFA's head-to-head sub-table) */
+function miniTable(g, teams){
+  const set=new Set(teams), t={};
+  teams.forEach(n=> t[n]={pts:0,gf:0,ga:0});
+  FIX[g].forEach((m,idx)=>{
+    const [h,a]=m; if(!set.has(h)||!set.has(a)) return;
+    const sc=scoreOfMatch(g,idx); if(!sc) return;
+    const [hs,as]=sc;
+    t[h].gf+=hs; t[h].ga+=as; t[a].gf+=as; t[a].ga+=hs;
+    if(hs>as) t[h].pts+=3; else if(as>hs) t[a].pts+=3; else { t[h].pts++; t[a].pts++; }
+  });
+  for(const n in t) t[n].gd=t[n].gf-t[n].ga;
+  return t;
+}
+/* FIFA 2026 order: points -> HEAD-TO-HEAD (points, GD, goals among the tied teams)
+   -> overall GD -> overall goals -> (fair play / FIFA ranking; we fall back to name).
+   Head-to-head is a mini-league among all teams level on points, re-applied to any
+   subset that stays level. New for 2026: head-to-head now precedes overall GD. */
+function resolveTie(g, teams, byName){
+  if(teams.length===1) return teams;
+  const mt=miniTable(g, teams);
+  const sorted=[...teams].sort((x,y)=> mt[y].pts-mt[x].pts || mt[y].gd-mt[x].gd || mt[y].gf-mt[x].gf);
+  const res=[]; let i=0;
+  while(i<sorted.length){
+    let j=i;
+    while(j<sorted.length && mt[sorted[j]].pts===mt[sorted[i]].pts
+          && mt[sorted[j]].gd===mt[sorted[i]].gd && mt[sorted[j]].gf===mt[sorted[i]].gf) j++;
+    const sub=sorted.slice(i,j);
+    if(sub.length===1) res.push(sub[0]);
+    else if(sub.length===teams.length){          // head-to-head separated nobody -> overall GD, goals, name
+      sub.sort((x,y)=> byName[y].gd-byName[x].gd || byName[y].gf-byName[x].gf || x.localeCompare(y));
+      res.push(...sub);
+    } else res.push(...resolveTie(g, sub, byName)); // partial split -> re-apply head-to-head to the rest
+    i=j;
   }
-  return 0;
+  return res;
+}
+function rankFifa(g, arr){
+  const byName=Object.fromEntries(arr.map(t=>[t.team,t]));
+  const out=[]; const byPoints=[...arr].sort((a,b)=> b.pts-a.pts); let i=0;
+  while(i<byPoints.length){
+    let j=i; while(j<byPoints.length && byPoints[j].pts===byPoints[i].pts) j++;
+    resolveTie(g, byPoints.slice(i,j).map(t=>t.team), byName).forEach(n=>out.push(byName[n]));
+    i=j;
+  }
+  return out;
 }
 /* ---- compute standings from real + predicted results ---- */
 function computeGroup(g){
@@ -320,9 +362,7 @@ function computeGroup(g){
     }
   });
   const arr = Object.values(t).map(x=>({...x, gd:x.gf-x.ga}));
-  // FIFA order: pts -> GD -> GF -> head-to-head -> (then a stable alphabetical fallback)
-  arr.sort((x,y)=> y.pts-x.pts || y.gd-x.gd || y.gf-x.gf || (-h2h(g,x.team,y.team)) || x.team.localeCompare(y.team));
-  return arr;
+  return rankFifa(g, arr);
 }
 function recomputeAll(){
   stand={}; picks={};

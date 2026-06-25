@@ -4,8 +4,10 @@ The quality posture of the codebase, for anyone reading or extending it.
 
 ## Correctness
 
-- Standings use the full FIFA tiebreaker order: points → goal difference → goals scored →
-  head-to-head.
+- Standings use the 2026 FIFA tiebreaker order: points → head-to-head (points, goal
+  difference, then goals among the level teams) → overall goal difference → overall goals.
+  Head-to-head ranking *before* overall goal difference is new for 2026, and the head-to-head
+  step is a proper mini-league among the tied teams, re-applied to any subset that stays level.
 - Third-place qualification and Round-of-32 placement follow FIFA's official 495-combination
   Annex C table, parsed from primary sources; a test asserts that every row respects the
   eligibility constraints and uses each qualifying group exactly once.

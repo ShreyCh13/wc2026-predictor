@@ -54,14 +54,22 @@ ok("normTeam: United States → usa", ctx.normTeam("United States") === "usa");
 ok("normTeam: Côte d'Ivoire → ivorycoast", ctx.normTeam("Côte d'Ivoire") === "ivorycoast");
 ok("normTeam: Congo DR → drcongo", ctx.normTeam("Congo DR") === "drcongo");
 
-// head-to-head reads the real result of two teams' game (Group A: Mexico 2-0 South Africa)
-ok("h2h: Mexico beat South Africa → +1", ctx.h2h("A","Mexico","South Africa") === 1);
-ok("h2h: reversed → -1", ctx.h2h("A","South Africa","Mexico") === -1);
-
 // standings are computed, not hardcoded — Mexico tops Group A on real results
 const A = ctx.computeGroup("A");
 ok("computeGroup returns sorted standings objects", Array.isArray(A) && A[0] && "pts" in A[0]);
 ok("Group A leader is Mexico (real results)", A[0].team === "Mexico");
+
+// 2026 rule: head-to-head outranks goal difference. Engineer a 6-point tie between Mexico
+// and South Korea where SK has the better overall GD but Mexico won their head-to-head
+// (real game A3: Mexico 1-0 South Korea). Mexico must finish above SK.
+ctx.setScore("A", 4, "h", "3"); ctx.setScore("A", 4, "a", "0");   // Czechia 3-0 Mexico (predicted)
+ctx.setScore("A", 5, "h", "0"); ctx.setScore("A", 5, "a", "3");   // South Africa 0-3 South Korea (predicted)
+const A2 = ctx.computeGroup("A");
+const mx = A2.find(t=>t.team==="Mexico"), sk = A2.find(t=>t.team==="South Korea");
+ok("tie is set up: Mexico & South Korea level on points, SK better GD",
+   mx.pts === sk.pts && sk.gd > mx.gd);
+ok("FIFA 2026: head-to-head outranks goal difference (Mexico above South Korea)",
+   A2.indexOf(mx) < A2.indexOf(sk));
 
 // scoring rubric: exact = 5, right result = 2, wrong = 0 (A0 real = Mexico 2-0 South Africa)
 ok("scoreOf: exact score → 5 pts", ctx.scoreOf({predicted:{A0:{h:"2",a:"0"}}}).pts === 5);
