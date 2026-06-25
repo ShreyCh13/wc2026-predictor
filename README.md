@@ -21,8 +21,8 @@ real match results as they come in — no manual updating, ever.
   scored automatically (**5 points for an exact score, 2 for the right winner**, plus
   round-weighted points for correctly predicting who advances). The board is a ranked
   leaderboard with your standing, your name, and per-game "you predicted X, actual was Y."
-- **Stays current on its own** — a pipeline pulls finished scores every 30 minutes; inputs lock
-  at kickoff so nobody predicts a game that already started.
+- **Stays current on its own** — a pipeline pulls finished scores every 30 minutes; as each game
+  finishes, the table and every leaderboard update automatically.
 
 ## How it works
 

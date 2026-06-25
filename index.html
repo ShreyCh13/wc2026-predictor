@@ -393,7 +393,6 @@ function renderGroups(){
     </div>`;
   }
 }
-function isLocked(m){ const ko=m[5]; return ko && (new Date(ko).getTime() <= Date.now()); }
 function matchesHTML(g){
   return FIX[g].map((m,idx)=>{
     const [h,a,hs,as,dt]=m;
@@ -412,10 +411,6 @@ function matchesHTML(g){
     const filled = hv!=="" && av!=="";
     let pcls=""; if(filled){ pcls = (+hv>+av)?"p-home":((+av>+hv)?"p-away":"p-draw"); }
     const hb = (filled&&+hv>+av)?`<b>${h}</b>`:h, ab = (filled&&+av>+hv)?`<b>${a}</b>`:a;
-    if(isLocked(m)){
-      const yp = filled ? `<span class="pvact good">you ${esc(hv)}–${esc(av)}</span>` : `<span class="pvact bad">no pick</span>`;
-      return `<div class="mrow up ${pcls}" style="opacity:.8"><span class="dt">${dt}</span><span class="mt">${hb} v ${ab}</span><span class="pred" title="kicked off — locked">🔒</span>${yp}</div>`;
-    }
     return `<div class="mrow up ${pcls}"><span class="dt">${dt}</span><span class="mt">${hb} v ${ab}</span>`+
       `<span class="sc-in"><input type="number" inputmode="numeric" min="0" max="20" placeholder="–" value="${hv}" onchange="setScore('${g}',${idx},'h',this.value)">`+
       `<span class="dash">–</span><input type="number" inputmode="numeric" min="0" max="20" placeholder="–" value="${av}" onchange="setScore('${g}',${idx},'a',this.value)"></span></div>`;
